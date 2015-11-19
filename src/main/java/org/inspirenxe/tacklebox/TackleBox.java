@@ -29,11 +29,13 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 
+import java.util.Locale;
 import java.util.Optional;
 
 @Plugin(id = "tacklebox", name = "TackleBox")
@@ -45,12 +47,31 @@ public class TackleBox {
         if (!player.isPresent()) return;
 
         final Transaction<ItemStackSnapshot> transaction = event.getItemStackTransaction();
-        if (!transaction.isValid()) return;
+        if (transaction.getFinal().getType().equals(ItemTypes.NONE)) return;
 
-        final Text text = transaction.getFinal().get(Keys.DISPLAY_NAME).get();
+        final Text text = Texts.of(transaction.getFinal().getType().getTranslation().get());
 
-        player.get().sendMessage(Texts.of("You reeled in ",
-                !text.toString().endsWith("s") ? "a " : "",
-                text));
+        player.get().sendMessage(Texts.of("You reeled in "), format(text));
+    }
+
+    private Text format(Text text) {
+        String plain = Texts.toPlain(text);
+        if (!plain.endsWith("s")) {
+            if (startsWithAny(plain, "a", "e", "i", "o", "u")) {
+                plain = "an " + plain;
+            } else {
+                plain = "a " + plain;
+            }
+        }
+        return Texts.of(plain);
+    }
+
+    private boolean startsWithAny(String text, String... values) {
+        for (String value : values) {
+            if (text.startsWith(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
