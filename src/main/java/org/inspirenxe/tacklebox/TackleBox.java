@@ -52,7 +52,7 @@ public class TackleBox {
             return;
         }
 
-        player.get().sendMessage(MESSAGE, format(transaction.getFinal().getType().getTranslation().get()));
+        player.get().sendMessage(Texts.of(MESSAGE, format(transaction.getFinal().createStack().getTranslation().get())));
     }
 
     private Text format(String plain) {
