@@ -25,7 +25,6 @@
 package org.inspirenxe.tacklebox;
 
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.FishingEvent;
@@ -35,27 +34,28 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 
-import java.util.Locale;
 import java.util.Optional;
 
 @Plugin(id = "tacklebox", name = "TackleBox")
 public class TackleBox {
+    private static final Text MESSAGE = Texts.of("You reeled in ");
 
     @Listener
     public void onFishingStop(FishingEvent.Stop event) {
         final Optional<Player> player = event.getCause().first(Player.class);
-        if (!player.isPresent()) return;
+        if (!player.isPresent()) {
+            return;
+        }
 
         final Transaction<ItemStackSnapshot> transaction = event.getItemStackTransaction();
-        if (transaction.getFinal().getType().equals(ItemTypes.NONE)) return;
+        if (transaction.getFinal().getType().equals(ItemTypes.NONE)) {
+            return;
+        }
 
-        final Text text = Texts.of(transaction.getFinal().getType().getTranslation().get());
-
-        player.get().sendMessage(Texts.of("You reeled in "), format(text));
+        player.get().sendMessage(MESSAGE, format(transaction.getFinal().getType().getTranslation().get()));
     }
 
-    private Text format(Text text) {
-        String plain = Texts.toPlain(text);
+    private Text format(String plain) {
         if (!plain.endsWith("s")) {
             if (startsWithAny(plain, "a", "e", "i", "o", "u")) {
                 plain = "an " + plain;
